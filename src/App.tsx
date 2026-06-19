@@ -136,56 +136,97 @@ export default function App() {
 
   // Dynamic App Notifications state
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
-    try {
-      const saved = localStorage.getItem("fitgym_notifications");
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn("Failed to load notifications", e);
-    }
-    return [
+    const DEFAULT_NOTIFS: AppNotification[] = [
       {
         id: "msg-tiep_tan-init",
         title: "Tin nhắn từ Tiếp Tân Vy Vy",
+        titleEn: "Message from Receptionist Vy Vy",
+        titleZh: "前台 Vy Vy 的消息",
         body: "Chào bạn! Mình là Vy Vy, phục vụ trực tổng đài lễ tân FIT GYM. Rất vui được kết nối hỗ trợ bạn!",
+        bodyEn: "Hello! My name is Vy Vy, from the FIT GYM reception desk. Happy to assist you!",
+        bodyZh: "您好！我是前台 Vy Vy，很高兴为您提供支持与服务！",
         time: "Vừa xong",
+        timeEn: "Just now",
+        timeZh: "刚才",
         isRead: false,
         type: "message",
       },
       {
         id: "msg-huan_luyen-init",
         title: "Tin nhắn từ PT Nam Khanh",
+        titleEn: "Message from PT Nam Khanh",
+        titleZh: "私人教练 Nam Khanh 的消息",
         body: "Hello, mình là PT Nam Khanh. Mình sẽ tư vấn chi tiết về giáo án tập luyện và ăn kiêng nhé!",
+        bodyEn: "Hello, I am PT Nam Khanh. Let me help you with some detailed training and diet plans!",
+        bodyZh: "您好，我是私人教练 Nam Khanh。我将为您提供详细的锻炼和饮食建议！",
         time: "5 phút trước",
+        timeEn: "5 minutes ago",
+        timeZh: "5分钟前",
         isRead: false,
         type: "message",
       },
       {
         id: "1",
         title: "Chào mừng hội viên mới!",
+        titleEn: "Welcome new member!",
+        titleZh: "欢迎新会员！",
         body: "Cảm ơn bạn đã lựa chọn FIT GYM. Hãy trải nghiệm tập luyện hoặc tham khảo các gói tập cực hot nhé!",
+        bodyEn: "Thank you for choosing FIT GYM. Start your training or check out our exclusive membership plans!",
+        bodyZh: "感谢您选择 FIT GYM。开始您的健身体验，或查看我们最热门的健身计划吧！",
         time: "10 phút trước",
+        timeEn: "10 minutes ago",
+        timeZh: "10分钟前",
         isRead: false,
         type: "welcome",
       },
       {
         id: "2",
         title: "Mã QR Check-in đã sẵn sàng",
+        titleEn: "Check-in QR code is ready",
+        titleZh: "签到二维码已就绪",
         body: "Thẻ số hội viên ảo đã được kích hoạt. Bạn có thể sử dụng mã QR tại Trang chủ để quét qua cổng tự động.",
+        bodyEn: "Your virtual membership pass is activated. You can now scan the QR code on the Home screen to enter.",
+        bodyZh: "您的虚拟会员卡已激活。您可以在首页使用该二维码在自助通道扫码进门。",
         time: "1 giờ trước",
+        timeEn: "1 hour ago",
+        timeZh: "1小时前",
         isRead: false,
         type: "auth",
       },
       {
         id: "3",
         title: "Quà tặng 20% gói Combo PT 1-1",
+        titleEn: "20% off 1-1 PT Combo promo",
+        titleZh: "1对1 PT私人教练套餐特惠8折",
         body: "Ưu đãi đặc quyền giảm 20% khi đăng ký PT kèm đo chỉ số InBody miễn phí. Nhắn tin hỗ trợ ở tab Chat để đăng ký.",
+        bodyEn: "Exclusive 20% off PT package with a complimentary InBody assessment. Msg us in Chats to claim!",
+        bodyZh: "注册私人教练课即享8折优惠，赠送免费 InBody 身体成分分析。请在‘聊天’选项卡给我留言报名。",
         time: "1 ngày trước",
+        timeEn: "1 day ago",
+        timeZh: "1天前",
         isRead: true,
         type: "promo",
       }
     ];
+
+    try {
+      const saved = localStorage.getItem("fitgym_notifications");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((item: any) => {
+            const defaults = DEFAULT_NOTIFS.find((d) => d.id === item.id);
+            if (defaults) {
+              return { ...item, ...defaults };
+            }
+            return item;
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to load notifications", e);
+    }
+    return DEFAULT_NOTIFS;
   });
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -225,7 +266,11 @@ export default function App() {
       id: "ai-init",
       role: "assistant",
       content: "Chào anh/chị nam! Tôi là Huấn luyện viên thể hình ảo của FIT GYM. Hãy hỏi tôi về lộ trình tập, chế độ ăn kiêng, tăng cơ, giảm cân hoặc thông tin gói tập.",
+      contentEn: "Hello! I am your virtual Gym Coach buddy. Ask me anything about workouts, diet plans, muscle building, weight loss, or gym membership packages.",
+      contentZh: "您好！我是 FIT GYM 的虚拟智能私人健身教练。欢迎向我咨询健身计划、饮食方案、增肌、减脂或会员卡包等细节。",
       timestamp: "Bây giờ",
+      timestampEn: "Now",
+      timestampZh: "此时",
     },
   ]);
   const [aiInputMessage, setAiInputMessage] = useState("");
@@ -244,7 +289,11 @@ export default function App() {
         id: "msg-init-tt",
         role: "assistant",
         content: SUPPORT_CONTACTS[0].initialMessage,
+        contentEn: SUPPORT_CONTACTS[0].initialMessageEn,
+        contentZh: SUPPORT_CONTACTS[0].initialMessageZh,
         timestamp: "Vừa xong",
+        timestampEn: "Just now",
+        timestampZh: "刚才",
       }
     ],
     huan_luyen: [
@@ -252,7 +301,11 @@ export default function App() {
         id: "msg-init-hl",
         role: "assistant",
         content: SUPPORT_CONTACTS[1].initialMessage,
+        contentEn: SUPPORT_CONTACTS[1].initialMessageEn,
+        contentZh: SUPPORT_CONTACTS[1].initialMessageZh,
         timestamp: "Vừa xong",
+        timestampEn: "Just now",
+        timestampZh: "刚才",
       }
     ],
     support_technical: [
@@ -260,7 +313,11 @@ export default function App() {
         id: "msg-init-tech",
         role: "assistant",
         content: SUPPORT_CONTACTS[2].initialMessage,
+        contentEn: SUPPORT_CONTACTS[2].initialMessageEn,
+        contentZh: SUPPORT_CONTACTS[2].initialMessageZh,
         timestamp: "Hôm qua",
+        timestampEn: "Yesterday",
+        timestampZh: "昨天",
       }
     ]
   });
@@ -600,33 +657,54 @@ export default function App() {
     setSupportReplyPending(true);
     setTimeout(() => {
       let replyText = "Cảm ơn anh/chị đã gửi tin nhắn. Em ghi nhận ý kiến và sẽ phản hồi chi tiết cho anh/chị ngay ạ!";
+      let replyTextEn = "Thank you for your message. We have received it and will respond in detail shortly!";
+      let replyTextZh = "感谢您的留言。我们已收到您的问题，稍后将为您提供详细解答！";
+      
       const userLower = userText.toLowerCase();
 
       if (agentId === "tiep_tan") {
-        if (userLower.includes("gói") || userLower.includes("dk") || userLower.includes("đăng ký")) {
+        if (userLower.includes("gói") || userLower.includes("dk") || userLower.includes("đăng ký") || userLower.includes("buy") || userLower.includes("register") || userLower.includes("membership") || userLower.includes("plan")) {
           replyText = "Dạ, để đăng ký gói tập nhanh nhất, anh/chị có thể chọn gói tập ngay trên tab GÓI TẬP ở màn hình này, hoặc đến ngay quầy lễ tân để em hỗ trợ quẹt thẻ kích hoạt tức thì ạ. Đang có chương trình ưu đãi giảm giá tốt đó anh/chị nhé!";
-        } else if (userLower.includes("hoàn tiền") || userLower.includes("hủy")) {
+          replyTextEn = "You can register for a package instantly under the PLANS section on this screen, or visit our front desk where we will check you in and activate your pass immediately. We have great promotions running right now!";
+          replyTextZh = "您可以在此屏幕的‘会员方案’选项卡中一键自助订购，或直接前往前台，由我们为您扫码激活。目前正值特惠期间，价格非常优惠哦！";
+        } else if (userLower.includes("hoàn tiền") || userLower.includes("hủy") || userLower.includes("refund") || userLower.includes("cancel")) {
           replyText = "Dạ, đối với quy trình hoàn tiền hoặc xin bảo lưu thẻ tập, anh/chị vui lòng mang theo CMND/CCCD bản gốc đến quầy lễ tân chi nhánh chính để quản lý bên em xác nhận tờ khai và duyệt hồ sơ trong vòng 1-3 ngày làm việc ạ.";
-        } else if (userLower.includes("giờ") || userLower.includes("mở cửa")) {
+          replyTextEn = "For physical refund requests or gym pass suspension, please bring your original ID card to our main branch reception. Our manager will process the form and approve it within 1-3 business days.";
+          replyTextZh = "对于退款或请假延期申请，请您携带本人身份证原件前往主分店前台提交书面申请。经理将在 1-3 个工作日内予以审核答复。";
+        } else if (userLower.includes("giờ") || userLower.includes("mở cửa") || userLower.includes("hour") || userLower.includes("time") || userLower.includes("open")) {
           replyText = "Chào anh/chị, FIT GYM mở cửa hoạt động liên tục các ngày trong tuần từ 05:00 sáng đến 22:00 đêm ạ. Chúc anh/chị có một buổi tập luyện hiệu quả!";
+          replyTextEn = "Hello! FIT GYM is open daily from 5:00 AM to 10:00 PM. Have a productive and energized workout session!";
+          replyTextZh = "您好！FIT GYM 每日于上午 05:00 至晚上 22:00 连续营业。祝您健身愉快、能量满满！";
         }
       } else if (agentId === "huan_luyen") {
-        if (userLower.includes("ngực") || userLower.includes("bài tập")) {
+        if (userLower.includes("ngực") || userLower.includes("bài tập") || userLower.includes("chest") || userLower.includes("workout")) {
           replyText = "Tập ngực muốn dày và rộng thì ưu tiên đẩy tạ Incline Dumbbell trước nhé bạn ơi. Chú ý khóa bả vai lại để tránh chấn thương khớp vai nha. Chiều qua phòng tập gặp mình, mình chỉ trực tiếp posture cho!";
-        } else if (userLower.includes("giảm cân") || userLower.includes("béo") || userLower.includes("mỡ")) {
+          replyTextEn = "If you want a thick chest, prioritize the Incline Dumbbell Press. Remember to retract and lock your scapula to prevent shoulder injuries. Stop by the gym this afternoon and I'll check your posture!";
+          replyTextZh = "想要练就宽厚饱满的胸肌，请优先做上斜哑铃推举（Incline Dumbbell Press）。切记沉肩夹背以防肩关节受伤。下午可以到力量区找我，我为您指正动作！";
+        } else if (userLower.includes("giảm cân") || userLower.includes("béo") || userLower.includes("mỡ") || userLower.includes("lose") || userLower.includes("fat") || userLower.includes("weight")) {
           replyText = "Chào bạn! Quy tắc cốt lõi là thâm hụt calo (Caloric Deficit). Bạn nên kết hợp tập tạ (khối lượng lớn) cùng 20-30 phút Cardio ở nhịp tim Zone 2 cuối buổi để đốt mỡ hiệu quả nhất.";
-        } else if (userLower.includes("protein") || userLower.includes("ăn gì")) {
+          replyTextEn = "Hi there! The core rule is Caloric Deficit. You should combine weight lifting with 20-30 minutes of low-intensity cardio at Zone 2 heart rate at the end of your session to burn fat.";
+          replyTextZh = "您好！减脂的底层逻辑是热量赤字。建议您将大重量抗阻训练与课后 20-30 分钟的 Zone 2 心率有氧运动相结合，这是公认最高效的燃脂方案。";
+        } else if (userLower.includes("protein") || userLower.includes("ăn gì") || userLower.includes("diet") || userLower.includes("eat")) {
           replyText = "Bạn nên bổ sung tối thiểu 1.5g Protein mỗi kg trọng lượng cơ thể. Nhóm thực phẩm khuyên dùng gồm: ức gà bỏ da, lòng trắng trứng, thịt bò nạc, cá thu/cá hồi hoặc bột Whey tăng cơ!";
+          replyTextEn = "You should consume at least 1.5g of protein per kg of body weight. Great sources include skinless chicken breast, egg whites, lean beef, salmon, or whey protein!";
+          replyTextZh = "建议您每天摄入每公斤体重至少 1.5g 的蛋白质。推荐食物包括：去皮鸡胸肉、蛋白、瘦牛肉、鳕鱼/三文鱼或乳清蛋白粉！";
         }
       } else if (agentId === "support_technical") {
         replyText = "Hệ thống Checkin phòng tập vừa được nâng cấp bảo mật. Nếu thẻ số của bạn bị khóa QR, vui lòng chọn mua gói tập bất kỳ trên tab để hệ thống tự động kích hoạt mã QR mở khóa nhé bạn!";
+        replyTextEn = "The gym check-in gates have been upgraded for security. If your pass is locked, please activate or purchase a package on the PLANS tab, and the QR code will instantly unlock!";
+        replyTextZh = "健身房检票系统近期已完成安全升级。如果您的门禁二维码被锁，请在‘会员方案’页面购买任意计划，系统将自动生成可用的通行二维码！";
       }
 
       const agentReply: Message = {
         id: `reply-${Date.now()}`,
         role: "assistant",
         content: replyText,
+        contentEn: replyTextEn,
+        contentZh: replyTextZh,
         timestamp: "Vừa xong",
+        timestampEn: "Just now",
+        timestampZh: "刚才",
       };
 
       setSupportAgentChats((prev) => ({
@@ -637,12 +715,20 @@ export default function App() {
       // Auto-trigger a system notification for the incoming message
       const agentObj = SUPPORT_CONTACTS.find((c) => c.id === agentId);
       const agentName = agentObj ? agentObj.name : (language === "VI" ? "Nhân viên hỗ trợ" : "Support Staff");
+      const agentNameEn = agentObj && agentObj.nameEn ? agentObj.nameEn : "Support Staff";
+      const agentNameZh = agentObj && agentObj.nameZh ? agentObj.nameZh : "客服专员";
       
       const newMsgNotif: AppNotification = {
         id: `msg-${agentId}-${Date.now()}`,
         title: language === "VI" ? `Tin nhắn mới từ ${agentName}` : `New message from ${agentName}`,
+        titleEn: `New message from ${agentNameEn}`,
+        titleZh: `来自 ${agentNameZh} 的新消息`,
         body: replyText,
+        bodyEn: replyTextEn,
+        bodyZh: replyTextZh,
         time: language === "VI" ? "Vừa xong" : "Just now",
+        timeEn: "Just now",
+        timeZh: "刚才",
         isRead: false,
         type: "message"
       };
@@ -801,11 +887,15 @@ export default function App() {
     // Add specific custom notification for newly registered member
     const newWelcomeNotif: AppNotification = {
       id: Date.now().toString(),
-      title: language === "VI" ? `Chào mừng ${regName.toUpperCase()}!` : `Welcome ${regName.toUpperCase()}!`,
-      body: language === "VI"
-        ? `Tài khoản với SĐT ${regPhone} đã đăng ký thành công. Chúc bạn có những giờ phút tập luyện hứng khởi tại FIT GYM!`
-        : `Your account with phone number ${regPhone} is active. Enjoy your workouts at FIT GYM!`,
-      time: language === "VI" ? "Vừa xong" : "Just now",
+      title: `Chào mừng ${regName.toUpperCase()}!`,
+      titleEn: `Welcome ${regName.toUpperCase()}!`,
+      titleZh: `欢迎您，${regName.toUpperCase()}！`,
+      body: `Tài khoản với SĐT ${regPhone} đã đăng ký thành công. Chúc bạn có những giờ phút tập luyện hứng khởi tại FIT GYM!`,
+      bodyEn: `Your account with phone number ${regPhone} is active. Enjoy your workouts at FIT GYM!`,
+      bodyZh: `您使用手机号 ${regPhone} 注册的会员账号已经成功激活。祝您在 FIT GYM 畅爽举铁、不断超越！`,
+      time: "Vừa xong",
+      timeEn: "Just now",
+      timeZh: "刚才",
       isRead: false,
       type: "welcome"
     };
@@ -971,6 +1061,7 @@ export default function App() {
             role: m.role,
             content: m.content,
           })),
+          language: language,
         }),
       });
 
@@ -983,8 +1074,10 @@ export default function App() {
       const responseMsgObj: Message = {
         id: `ai-${Date.now()}`,
         role: "assistant",
-        content: data.reply || "Tôi không nghe rõ lắm, bạn có thể giải thích thêm không?",
+        content: data.reply || (language === "VI" ? "Tôi không nghe rõ lắm, bạn có thể giải thích thêm không?" : language === "ZH" ? "我没太听清楚，您能再解释一下吗？" : "I couldn't hear you clearly, could you explain further?"),
         timestamp: "Vừa xong",
+        timestampEn: "Just now",
+        timestampZh: "刚才",
       };
       setAiChatMessages((prev) => [...prev, responseMsgObj]);
     } catch (err) {
@@ -994,8 +1087,14 @@ export default function App() {
         const errorReplyObj: Message = {
           id: `ai-error-${Date.now()}`,
           role: "assistant",
-          content: "Để cải thiện cơ bắp nhanh nhất, hãy kết hợp các bài Bench Press và Protein dinh dưỡng đầy đủ bạn nhé. Rất tiếc, AI Coach tạm thời bị gián đoạn mạng, hãy thử lại sau!",
+          content: language === "VI"
+            ? "Để cải thiện cơ bắp nhanh nhất, hãy kết hợp các bài Bench Press và Protein dinh dưỡng đầy đủ bạn nhé. Rất tiếc, AI Coach tạm thời bị gián đoạn mạng, hãy thử lại sau!"
+            : language === "ZH"
+            ? "为了尽快增肌，请将卧推（Bench Press）与充足的蛋白质营养结合起来。抱歉，AI 智能教练暂时断开连接，请稍后再试！"
+            : "To improve muscles fastest, combine Bench Press workouts with proper protein nutrition. Apologies, the AI Coach is temporarily offline, please try again later!",
           timestamp: "Hệ thống",
+          timestampEn: "System",
+          timestampZh: "系统",
         };
         setAiChatMessages((prev) => [...prev, errorReplyObj]);
       }, 700);
@@ -1042,13 +1141,15 @@ export default function App() {
       // Add a notification for package subscription
       const newNotif: AppNotification = {
         id: Date.now().toString(),
-        title: language === "VI" ? "Kích hoạt gói tập mới!" : language === "ZH" ? "新健身方案已激活！" : "New package activated!",
-        body: language === "VI"
-          ? `Bạn đã thanh toán thành công gói ${checkoutModalPackage.name}. Mã QR Check-in ở Trang Chủ đã sẵn sàng mở khóa!`
-          : language === "ZH"
-          ? `您已成功购买 ${checkoutModalPackage.name}。您的签到二维码已在首页生成！`
-          : `You have successfully purchased ${checkoutModalPackage.name}. Your Check-in QR code is ready on Home screen!`,
-        time: language === "VI" ? "Vừa xong" : language === "ZH" ? "刚刚" : "Just now",
+        title: "Kích hoạt gói tập mới!",
+        titleEn: "New package activated!",
+        titleZh: "新健身方案已激活！",
+        body: `Bạn đã thanh toán thành công gói ${checkoutModalPackage.name}. Mã QR Check-in ở Trang Chủ đã sẵn sàng mở khóa!`,
+        bodyEn: `You have successfully purchased ${checkoutModalPackage.nameEn || checkoutModalPackage.name}. Your Check-in QR code is ready on Home screen!`,
+        bodyZh: `您已成功购买 ${checkoutModalPackage.nameZh || checkoutModalPackage.name}。您的签到二维码已在首页生成！`,
+        time: "Vừa xong",
+        timeEn: "Just now",
+        timeZh: "刚才",
         isRead: false,
         type: "billing"
       };
@@ -1185,17 +1286,45 @@ export default function App() {
     }
     if (msg.id === "msg-init-tt") {
       const contact = SUPPORT_CONTACTS.find((c) => c.id === "tiep_tan");
-      return contact ? getContactInitial(contact) : msg.content;
+      return contact ? getContactInitial(contact) : (language === "EN" && msg.contentEn ? msg.contentEn : (language === "ZH" && msg.contentZh ? msg.contentZh : msg.content));
     }
     if (msg.id === "msg-init-hl") {
       const contact = SUPPORT_CONTACTS.find((c) => c.id === "huan_luyen");
-      return contact ? getContactInitial(contact) : msg.content;
+      return contact ? getContactInitial(contact) : (language === "EN" && msg.contentEn ? msg.contentEn : (language === "ZH" && msg.contentZh ? msg.contentZh : msg.content));
     }
     if (msg.id === "msg-init-tech") {
       const contact = SUPPORT_CONTACTS.find((c) => c.id === "support_technical");
-      return contact ? getContactInitial(contact) : msg.content;
+      return contact ? getContactInitial(contact) : (language === "EN" && msg.contentEn ? msg.contentEn : (language === "ZH" && msg.contentZh ? msg.contentZh : msg.content));
     }
+    if (language === "EN" && msg.contentEn) return msg.contentEn;
+    if (language === "ZH" && msg.contentZh) return msg.contentZh;
     return msg.content;
+  };
+
+  const getTranslatedNotificationTitle = (n: any) => {
+    if (!n) return "";
+    if (language === "EN" && n.titleEn) return n.titleEn;
+    if (language === "ZH" && n.titleZh) return n.titleZh;
+    return n.title;
+  };
+
+  const getTranslatedNotificationBody = (n: any) => {
+    if (!n) return "";
+    if (language === "EN" && n.bodyEn) return n.bodyEn;
+    if (language === "ZH" && n.bodyZh) return n.bodyZh;
+    return n.body;
+  };
+
+  const getTranslatedNotificationTime = (n: any) => {
+    if (!n) return "";
+    if (language === "EN" && n.timeEn) return n.timeEn;
+    if (language === "ZH" && n.timeZh) return n.timeZh;
+    if (n.time === "Vừa xong") return t("Vừa xong", "Just now", "刚才");
+    if (n.time === "5 phút trước") return t("5 phút trước", "5 minutes ago", "5分钟前");
+    if (n.time === "10 phút trước") return t("10 phút trước", "10 minutes ago", "10分钟前");
+    if (n.time === "1 giờ trước") return t("1 giờ trước", "1 hour ago", "1小时前");
+    if (n.time === "1 ngày trước") return t("1 ngày trước", "1 day ago", "1天前");
+    return n.time;
   };
 
   const renderLanguageDropdown = () => {
@@ -1494,13 +1623,13 @@ export default function App() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className={`text-[10px] truncate leading-tight ${n.isRead ? "text-zinc-400 font-medium" : "text-white font-bold"}`}>
-                                    {n.title}
+                                    {getTranslatedNotificationTitle(n)}
                                   </p>
                                   <p className="text-[9px] text-zinc-500 line-clamp-2 mt-0.5 leading-normal">
-                                    {n.body}
+                                    {getTranslatedNotificationBody(n)}
                                   </p>
                                   <p className="text-[8px] text-zinc-600 font-mono mt-1">
-                                    {n.time}
+                                    {getTranslatedNotificationTime(n)}
                                   </p>
                                 </div>
                               </div>
@@ -1542,16 +1671,18 @@ export default function App() {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1.5">
                                     <p className={`text-[10px] truncate leading-tight ${n.isRead ? "text-zinc-400 font-medium" : "text-white font-black"}`}>
-                                      {n.title}
+                                      {getTranslatedNotificationTitle(n)}
                                     </p>
-                                    <span className="text-[7px] text-[#D2FF00] border border-[#D2FF00]/20 bg-[#D2FF00]/5 px-1 rounded uppercase font-black tracking-widest shrink-0">HỖ TRỢ</span>
+                                    <span className="text-[7px] text-[#D2FF00] border border-[#D2FF00]/20 bg-[#D2FF00]/5 px-1 rounded uppercase font-black tracking-widest shrink-0">
+                                      {language === "VI" ? "HỖ TRỢ" : "SUPPORT"}
+                                    </span>
                                   </div>
                                   <p className="text-[9.5px] text-zinc-300 line-clamp-2 mt-1 leading-normal italic">
-                                    "{n.body}"
+                                    "{getTranslatedNotificationBody(n)}"
                                   </p>
                                   <div className="flex items-center justify-between mt-2 pt-1 border-t border-zinc-900/40">
                                     <span className="text-[8px] text-zinc-600 font-mono">
-                                      {n.time}
+                                      {getTranslatedNotificationTime(n)}
                                     </span>
                                     <span className="text-[8.5px] text-[#D2FF00] group-hover:underline font-mono font-black tracking-wide uppercase flex items-center gap-0.5">
                                       {language === "VI" ? "TRẢ LỜI NGAY" : "REPLY NOW"} →
@@ -1706,7 +1837,7 @@ export default function App() {
 
                         <div className="w-full border-t border-zinc-900" />
 
-                        <div className="w-full flex justify-end">
+                        <div className="w-full flex justify-center">
                           <button
                             type="button"
                             onClick={() => {
@@ -3841,47 +3972,7 @@ export default function App() {
               </div>
             </div>
             
-            {/* FLOATING ACTION BRAND BUTTON (Sparkles glow icon bottom-right) match image 5 */}
-            {isLoggedScreen && (
-              <button
-                onClick={() => {
-                  if (didDragMoved.current) {
-                    // It was a drag, do not trigger click
-                    return;
-                  }
-                  setCurrentScreen("CHAT_AI");
-                  showToast(language === "VI" ? "Huấn luyện viên ảo AI Coach đã sẵn sàng!" : "Virtual AI Coach is fully ready!");
-                }}
-                onMouseDown={(e) => {
-                  if (e.button !== 0) return;
-                  setIsDraggingFab(true);
-                  didDragMoved.current = false;
-                  dragStartPos.current = { x: e.clientX, y: e.clientY };
-                  currentOffsetStart.current = { ...fabOffset };
-                }}
-                onTouchStart={(e) => {
-                  if (e.touches.length === 0) return;
-                  setIsDraggingFab(true);
-                  didDragMoved.current = false;
-                  const touch = e.touches[0];
-                  dragStartPos.current = { x: touch.clientX, y: touch.clientY };
-                  currentOffsetStart.current = { ...fabOffset };
-                }}
-                type="button"
-                id="floating-glow-action-button"
-                style={{
-                  transform: `translate(${fabOffset.x}px, ${fabOffset.y}px)`,
-                }}
-                className={`absolute bottom-24 right-14 w-12 h-12 rounded-full bg-[#D2FF00] hover:bg-[#c6ef00] text-black border border-black/10 shadow-[0_0_20px_rgba(210,255,0,0.4)] hover:shadow-[0_0_30px_rgba(210,255,0,0.6)] flex items-center justify-center select-none font-bold z-[100] cursor-grab active:cursor-grabbing transition-transform duration-75 ${
-                  isDraggingFab
-                    ? "scale-110 ring-2 ring-white/50 shadow-[0_0_35px_rgba(210,255,0,0.85)]"
-                    : (fabOffset.x === 0 && fabOffset.y === 0 ? "animate-bounce hover:scale-105" : "hover:scale-105")
-                }`}
-                title={language === "VI" ? "Nhấn giữ và kéo để di chuyển" : "Hold & drag to move around"}
-              >
-                <Sparkles className="size-[22px] text-black animate-pulse" />
-              </button>
-            )}
+            {/* Floating Action Brand Button removed */}
 
         </div>
       </div>

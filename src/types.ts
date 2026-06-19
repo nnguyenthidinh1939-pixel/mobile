@@ -30,7 +30,11 @@ export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  contentEn?: string;
+  contentZh?: string;
   timestamp: string;
+  timestampEn?: string;
+  timestampZh?: string;
 }
 
 export interface GymPackage {
@@ -74,8 +78,14 @@ export interface SupportContact {
 export interface AppNotification {
   id: string;
   title: string;
+  titleEn?: string;
+  titleZh?: string;
   body: string;
+  bodyEn?: string;
+  bodyZh?: string;
   time: string;
+  timeEn?: string;
+  timeZh?: string;
   isRead: boolean;
   type: "welcome" | "auth" | "promo" | "workout" | "billing" | "message";
 }
